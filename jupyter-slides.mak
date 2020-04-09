@@ -15,6 +15,8 @@ handouts :: $(NOTEBOOK_PDFS)
 pdf-slides :: $(NOTEBOOK_PDF_SLIDES)
 
 clean :: $(NOTEBOOK_CLEAN)
+	-rm .jupyter-slides.dep
+	-rm index.html
 
 index.html : $(NOTEBOOK_SOURCES)
 	ls -v -1 $(NOTEBOOK_SOURCES) \
@@ -38,3 +40,8 @@ serve :: slides index.html
 
 %.__clean__: %.ipynb
 	-rm -f $*.pdf $*.slides.html $*.slides.pdf
+
+-include .jupyter-slides.dep
+
+.jupyter-slides.dep : $(NOTEBOOK_SOURCES)
+	md-images -k -d .pdf -d .slides.pdf $^ > $@
