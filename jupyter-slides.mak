@@ -16,6 +16,15 @@ pdf-slides :: $(NOTEBOOK_PDF_SLIDES)
 
 clean :: $(NOTEBOOK_CLEAN)
 
+index.html : $(NOTEBOOK_SOURCES)
+	ls -v -1 $(NOTEBOOK_SOURCES) \
+		| sed -Ee 's/^(.*)\.ipynb/*\ [\1](\1.slides.html)/' \
+		| pandoc -t html --metadata "title=$$(basename $$(pwd))" --self-contained -o $@ -
+
+serve :: slides index.html
+	( sleep 0.5 && python3 -m webbrowser -t http://localhost:8000/ ) &
+	python3 -m http.server 8000 --bind localhost 
+
 
 %.slides.html : %.ipynb
 	jupyter nbconvert --to slides $(NBCONVERT_EXTRA_ARGS) $<
