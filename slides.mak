@@ -3,17 +3,20 @@ SLIDE_PDFS = $(SLIDE_SOURCES:.md=.pdf)
 SLIDE_CLEAN = $(SLIDE_SOURCES:.md=.__clean__)
 HANDOUT_PDFS = $(SLIDE_SOURCES:.md=-handout.pdf)
 
-SLIDE_PANDOC_ARGS=-t beamer --template default --filter pandoc-svg --pdf-engine lualatex
+SLIDE_PANDOC_ARGS=-t beamer --template default --pdf-engine lualatex
 SLIDE_PANDOC_EXTRA_ARGS=--slide-level 2 -V theme=TV2
 
-HANDOUT_PANDOC_ARGS=-t latex --filter pandoc-svg --pdf-engine lualatex
+HANDOUT_PANDOC_ARGS=-t latex --pdf-engine lualatex
 HANDOUT_PANDOC_EXTRA_ARGS=--template tvd
 
 default : slides
 
-slides :: $(SLIDE_PDFS)
 
-handouts:: $(HANDOUT_PDFS)
+slides :: $(SLIDE_PDFS)              ## Render all slides
+
+titlepngs :: $(SLIDE_PDFS:.pdf=-title.png)   ## For each slideshow, extract a png with the first slide as a title
+
+handouts:: $(HANDOUT_PDFS)            ## For each slideshow, generate a handout
 
 $(SLIDE_PDFS): %.pdf : %.md
 	pandoc $(SLIDE_PANDOC_ARGS) $(SLIDE_PANDOC_EXTRA_ARGS) -o $@ $<
@@ -30,16 +33,17 @@ $(HANDOUT_PDFS): %-handout.pdf : %.md
 
 .PHONY: slides-clean clean
 
-slides-clean : $(SLIDE_CLEAN)
+
+slides-clean : $(SLIDE_CLEAN) ## remove generated files for each slideshow
 	-rm .pd-slides.dep
 
-clean :: slides-clean
+clean :: slides-clean ## remove generated files for each slideshow
 
 %.__clean__ : %.md
-	-rm -f $*.pdf $*-handout.pdf
+	-rm -f $*.pdf $*-handout.pdf $*-title.png
 
 %.pdf : %.svg
-	inkscape --without-gui --export-file=$@ $^
+	inkscape -o $@ $^
 
 
 %.pdf : %.dot
@@ -50,11 +54,12 @@ complete-script.md : $(SLIDE_SOURCES)
 	cat $^ > $@
 
 
-complete-script.pdf : complete-script.md $(SLIDE_PDFS)
+complete-script.pdf : complete-script.md $(SLIDE_PDFS)   ## All handouts concatenated
 	pandoc $(HANDOUT_PANDOC_ARGS) $(HANDOUT_PANDOC_EXTRA_ARGS) -o $@ $<
 
 
-info::
+
+info::  ## some information about the makefile about the makefile
 	@echo "## slides.mak: Create pandoc slides"
 	@echo "Variables:"
 	@echo "  SLIDE_SOURCES=$(SLIDE_SOURCES)"
@@ -68,3 +73,7 @@ info::
 
 
 
+%-title.png : %.pdf   ## Generate a title image suitable for videos
+	pdftocairo -png -scale-to-x 1920 -scale-to-y 1080 -singlefile $< `basename $@`
+
+-include pd/common.mak

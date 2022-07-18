@@ -41,7 +41,12 @@ serve :: slides index.html
 %.__clean__: %.ipynb
 	-rm -f $*.pdf $*.slides.html $*.slides.pdf
 
+ifndef NO_DEPS
 -include .jupyter-slides.dep
 
 .jupyter-slides.dep : $(NOTEBOOK_SOURCES)
 	md-images -k -d .pdf -d .slides.pdf $^ > $@
+endif
+
+gitignore ::
+	git ignore -l .jupyter-slides.dep $(NOTEBOOK_SLIDES) $(NOTEBOOK_PDFS) $(NOTEBOOK_PDF_SLIDES) $(.INTERMEDIATES)
