@@ -3,8 +3,8 @@ SLIDE_PDFS = $(SLIDE_SOURCES:.md=.pdf)
 SLIDE_CLEAN = $(SLIDE_SOURCES:.md=.__clean__)
 HANDOUT_PDFS = $(SLIDE_SOURCES:.md=-handout.pdf)
 
-SLIDE_PANDOC_ARGS=-t beamer --template default --pdf-engine lualatex
-SLIDE_PANDOC_EXTRA_ARGS=--slide-level 2 -V theme=TV2
+SLIDE_PANDOC_ARGS=--defaults pandoc-beamer.yaml
+SLIDE_PANDOC_EXTRA_ARGS=
 
 HANDOUT_PANDOC_ARGS=-t latex --pdf-engine lualatex
 HANDOUT_PANDOC_EXTRA_ARGS=--template tvd
@@ -18,7 +18,7 @@ titlepngs :: $(SLIDE_PDFS:.pdf=-title.png)   ## For each slideshow, extract a pn
 
 handouts:: $(HANDOUT_PDFS)            ## For each slideshow, generate a handout
 
-$(SLIDE_PDFS): %.pdf : %.md
+$(SLIDE_PDFS): %.pdf : %.md pandoc-beamer.yaml
 	pandoc $(SLIDE_PANDOC_ARGS) $(SLIDE_PANDOC_EXTRA_ARGS) -o $@ $<
 
 $(HANDOUT_PDFS): %-handout.pdf : %.md
@@ -75,5 +75,31 @@ info::  ## some information about the makefile about the makefile
 
 %-title.png : %.pdf   ## Generate a title image suitable for videos
 	pdftocairo -png -scale-to-x 1920 -scale-to-y 1080 -singlefile $< `basename $@`
+
+
+define _pandoc_beamer
+cat > pandoc-beamer.yaml <<EOF
+to: beamer
+fail-if-warnings: false
+filters:
+  - pandoc-svg
+pdf-engine: lualatex
+pdf-engine-opts:
+  - '-shell-escape'
+variables:
+  theme: TV2
+  aspectratio: 169
+metadata:
+  author: Thorsten Vitt
+  date: Softwareprojekte · Winter 2022
+EOF
+endef
+export pandoc_beamer=$(value _pandoc_beamer)
+
+pandoc-beamer.yaml :
+	@eval "$$pandoc_beamer"
+
+.SECONDARY: pandoc-beamer.yaml
+
 
 -include pd/common.mak
