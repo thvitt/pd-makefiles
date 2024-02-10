@@ -11,10 +11,11 @@ SLIDE_PANDOC_EXTRA_ARGS=--slide-level 2 -V theme=TV2
 
 # HANDOUT_PANDOC_ARGS=-t latex --pdf-engine lualatex
 # HANDOUT_PANDOC_EXTRA_ARGS=--template tvd
-HANDOUT_PANDOC_ARGS=$(SLIDE_PANDOC_ARGS) --lua-filter=exclude.lua -M exclude=solutions -V classoption=handout
+HANDOUT_PANDOC_ARGS=$(SLIDE_PANDOC_ARGS) --lua-filter=exclude.lua -M exclude=solution -V classoption=handout
 
 #LATEXMK_ARGS=-auxdir=.cache -emulate-aux-dir -f -interaction=nonstopmode -quiet
-LATEXMK_ARGS=-f -interaction=nonstopmode -quiet -g
+LATEXMK_ARGS=-f -interaction=nonstopmode -quiet -g 
+
 
 default : slides
 
@@ -44,7 +45,7 @@ handouts:: $(HANDOUT_PDFS)            ## For each slideshow, generate a handout
 
 .PHONY: slides-clean clean slides handouts titlepngs default texs
 
-.PRECIOUS: $(SLIDE_TEXS)
+# .PRECIOUS: $(SLIDE_TEXS)
 
 texs : $(SLIDE_TEXS)
 

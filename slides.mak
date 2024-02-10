@@ -6,8 +6,9 @@ HANDOUT_PDFS = $(SLIDE_SOURCES:.md=-handout.pdf)
 SLIDE_PANDOC_ARGS=--defaults pandoc-beamer.yaml
 SLIDE_PANDOC_EXTRA_ARGS=
 
-HANDOUT_PANDOC_ARGS=-t latex --pdf-engine lualatex
-HANDOUT_PANDOC_EXTRA_ARGS=--template tvd
+HANDOUT_PANDOC_ARGS=$(SLIDE_PANDOC_ARGS) --lua-filter=exclude.lua -M exclude=solutions -V classoption=handout
+#HANDOUT_PANDOC_ARGS=-t latex --pdf-engine lualatex
+#HANDOUT_PANDOC_EXTRA_ARGS=--template tvd
 
 default : slides
 
